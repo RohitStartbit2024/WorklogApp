@@ -1,0 +1,77 @@
+﻿@page "/manager/projects/assign/{ProjectId:int}"
+@using WorklogApp.Models
+@using WorklogApp.Services
+@inject ProjectService ProjectService
+@inject NavigationManager Navigation
+
+<h3>Assign Users to Project</h3>
+
+@if (project == null || users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h5>@project.Name</h5>
+
+    <EditForm Model="this" OnValidSubmit="SaveAssignments">
+        @foreach (var item in assignList)
+        {
+            <div class="form-check">
+                <InputCheckbox class="form-check-input" @bind-Value="item.Assigned" />
+                <label class="form-check-label">@item.Name</label>
+            </div>
+        }
+
+        <button type="submit" class="btn btn-primary mt-2">Save</button>
+        <button type="button" class="btn btn-secondary mt-2" @onclick="Cancel">Cancel</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int ProjectId { get; set; }
+    private Project? project;
+    private List<User>? users;
+
+    private List<AssignUserItem> assignList = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        project = await ProjectService.GetProjectAsync(ProjectId);
+        users = await ProjectService.GetAllUsersAsync();
+
+        // Filter only Employees
+        var employeeUsers = users!.Where(u => u.UserRole != null && u.UserRole.Role == "Employee").ToList();
+
+        assignList = employeeUsers.Select(u => new AssignUserItem
+        {
+            UserId = u.Id,
+            Name = $"{u.FirstName} {u.LastName}",
+            Assigned = project?.UserProjects?.Any(up => up.UserId == u.Id) ?? false
+        }).ToList();
+    }
+
+    private async Task SaveAssignments()
+    {
+        var selectedUserIds = assignList
+            .Where(a => a.Assigned)
+            .Select(a => a.UserId)
+            .ToList();
+
+        await ProjectService.AssignUsersToProject(ProjectId, selectedUserIds);
+        Navigation.NavigateTo("/manager/projects");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/manager/projects");
+    }
+
+    private class AssignUserItem
+    {
+        public int UserId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool Assigned { get; set; }
+    }
+}
+
