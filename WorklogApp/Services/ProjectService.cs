@@ -57,6 +57,16 @@ namespace WorklogApp.Services
             }
         }
 
+        public async Task<List<Project>> GetProjectsByManagerAsync(int managerId)
+        {
+            // Assuming a UserProjects table links users to projects
+            return await _context.UserProjects
+                .Where(up => up.UserId == managerId)
+                .Select(up => up.Project!)
+                .Distinct()
+                .ToListAsync();
+        }
+
         public async Task AssignUsersToProject(int projectId, List<int> userIds)
         {
             var existingAssignments = _context.UserProjects.Where(up => up.ProjectId == projectId);

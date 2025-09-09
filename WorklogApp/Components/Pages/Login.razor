@@ -1,0 +1,68 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Identity
+@using WorklogApp.Models;
+@using Microsoft.EntityFrameworkCore
+
+@inject NavigationManager navManager
+@inject WorklogApp.Services.CurrentUserService CurrentUserService
+@inject WorklogApp.Data.AppDbContext AppDbContext
+
+<h3>Login</h3>
+
+<EditForm Model="@loginModel" OnValidSubmit="LoginUser">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText @bind-Value="loginModel.Email" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Password</label>
+        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="text-danger mt-2">@errorMessage</div>
+    }
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new();
+    private string errorMessage = "";
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+
+    private async Task LoginUser()
+    {
+        var user = await AppDbContext.Users
+            .Include(u => u.UserRole)
+            .FirstOrDefaultAsync(u => u.Email == loginModel.Email);
+
+        if (user == null)
+        {
+            errorMessage = "Invalid credentials";
+            return;
+        }
+
+        var passwordHasher = new PasswordHasher<User>();
+        var result = passwordHasher.VerifyHashedPassword(user, user.Password, loginModel.Password);
+
+        if (result == PasswordVerificationResult.Success)
+        {
+            await CurrentUserService.SetUserAsync(user);
+            navManager.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = "Invalid credentials";
+        }
+    }
+}

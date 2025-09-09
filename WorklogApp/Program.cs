@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 using Microsoft.EntityFrameworkCore;
 using WorklogApp.Components;
 using WorklogApp.Data;
@@ -21,7 +22,9 @@ namespace WorklogApp
 
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<ProjectService>();
-
+            builder.Services.AddScoped<WorklogService>();
+            builder.Services.AddScoped<CurrentUserService>();
+            builder.Services.AddScoped<ProtectedLocalStorage>();
 
             var app = builder.Build();
 

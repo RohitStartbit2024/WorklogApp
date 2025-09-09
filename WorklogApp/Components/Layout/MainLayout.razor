@@ -1,4 +1,7 @@
-﻿@inherits LayoutComponentBase
+﻿@using WorklogApp.Services
+
+@inherits LayoutComponentBase
+@inject CurrentUserService CurrentUserService
 
 <div class="page">
     <div class="sidebar">
@@ -21,3 +24,17 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private bool _userLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_userLoaded)
+        {
+            await CurrentUserService.LoadUserAsync();
+            _userLoaded = true;
+            StateHasChanged(); // re-render after loading user
+        }
+    }
+}

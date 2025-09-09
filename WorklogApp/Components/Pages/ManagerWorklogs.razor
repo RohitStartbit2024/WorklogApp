@@ -1,0 +1,147 @@
+﻿@page "/manager/worklogs"
+@using WorklogApp.Models
+@using WorklogApp.Services
+@inject WorklogService WorklogService
+@inject ProjectService ProjectService
+@inject CurrentUserService CurrentUserService
+@inject NavigationManager Navigation
+
+<h3>Worklogs Approval</h3>
+
+@if (!CurrentUserLoaded)
+{
+    <p><em>Loading...</em></p>
+}
+else if (CurrentUserService.CurrentUser == null)
+{
+    Navigation.NavigateTo("/");
+}
+else if (projects == null)
+{
+    <p><em>Loading projects...</em></p>
+}
+else
+{
+    <div class="mb-3">
+        <label>Select Project:</label>
+        <select class="form-control" @onchange="OnProjectChange">
+            <option value="">-- All Projects --</option>
+            @foreach (var p in projects)
+            {
+                <option value="@p.Id" selected="@(selectedProjectId == p.Id)">
+                    @p.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <table class="table table-striped mt-3">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Date</th>
+                <th>Project</th>
+                <th>Online</th>
+                <th>Offline</th>
+                <th>Other</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (worklogs != null)
+            {
+                @foreach (var w in worklogs)
+                {
+                    <tr>
+                        <td>@w.User?.FirstName @w.User?.LastName</td>
+                        <td>@w.Date</td>
+                        <td>@w.Project?.Name</td>
+                        <td>@w.OnlineHours</td>
+                        <td>@w.OfflineHours</td>
+                        <td>@w.OtherHours</td>
+                        <td>@w.Description</td>
+                        <td>@w.Status</td>
+                        <td>
+                            @if (w.Status == WorklogStatus.Pending)
+                            {
+                                <button class="btn btn-sm btn-success me-1" @onclick="() => Approve(w.Id)">Approve</button>
+                                <button class="btn btn-sm btn-danger" @onclick="() => Reject(w.Id)">Reject</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Project>? projects;
+    private List<Worklog>? worklogs;
+    private int? selectedProjectId;
+    private bool CurrentUserLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CurrentUserService.LoadUserAsync();
+            CurrentUserLoaded = true;
+            StateHasChanged();
+
+            if (CurrentUserService.CurrentUser != null)
+            {
+                var managerId = CurrentUserService.CurrentUser.Id;
+                projects = await ProjectService.GetProjectsByManagerAsync(managerId);
+                await LoadWorklogs();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnProjectChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int projectId))
+        {
+            selectedProjectId = projectId;
+        }
+        else
+        {
+            selectedProjectId = null;
+        }
+
+        await LoadWorklogs();
+    }
+
+    private async Task LoadWorklogs()
+    {
+        if (selectedProjectId.HasValue)
+        {
+            worklogs = await WorklogService.GetWorklogsByProjectAsync(selectedProjectId.Value);
+        }
+        else
+        {
+            var allWorklogs = new List<Worklog>();
+            foreach (var p in projects!)
+            {
+                var logs = await WorklogService.GetWorklogsByProjectAsync(p.Id);
+                allWorklogs.AddRange(logs);
+            }
+            worklogs = allWorklogs.OrderByDescending(w => w.Date).ToList();
+        }
+    }
+
+    private async Task Approve(int worklogId)
+    {
+        await WorklogService.ApproveWorklogAsync(worklogId);
+        await LoadWorklogs();
+    }
+
+    private async Task Reject(int worklogId)
+    {
+        await WorklogService.RejectWorklogAsync(worklogId);
+        await LoadWorklogs();
+    }
+}
