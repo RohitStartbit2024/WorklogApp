@@ -40,6 +40,14 @@ namespace WorklogApp.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task<List<User>> GetEmployeesAsync()
+        {
+            return await _context.Users
+                .Include(u => u.UserRole)
+                .Where(u => u.UserRole != null && u.UserRole.Role == "Employee")
+                .ToListAsync();
+        }
+
         public async Task UpdateUserAsync(User user)
         {
             var existingUser = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == user.Id);
