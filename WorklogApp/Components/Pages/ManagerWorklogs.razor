@@ -6,6 +6,7 @@
 @inject CurrentUserService CurrentUserService
 @inject NavigationManager Navigation
 
+<ProtectedPage TPage="object" AllowedRoles="@managerRoles">
 <h3>Worklogs Approval</h3>
 
 @if (!CurrentUserLoaded)
@@ -76,12 +77,14 @@ else
         </tbody>
     </table>
 }
+</ProtectedPage>
 
 @code {
     private List<Project>? projects;
     private List<Worklog>? worklogs;
     private int? selectedProjectId;
     private bool CurrentUserLoaded = false;
+    private string[] managerRoles = new[] { "Manager" };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

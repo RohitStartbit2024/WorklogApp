@@ -1,0 +1,41 @@
+﻿@typeparam TPage
+@using WorklogApp.Services
+@inject CurrentUserService CurrentUserService
+@inject NavigationManager NavManager
+
+@code {
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public string[] AllowedRoles { get; set; } = Array.Empty<string>();
+
+    private bool isLoaded = false;
+    private bool isAuthorized = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await CurrentUserService.LoadUserAsync();
+
+        isAuthorized = CurrentUserService.CurrentUser != null &&
+                       AllowedRoles.Contains(CurrentUserService.CurrentUser.RoleName);
+
+        isLoaded = true;
+
+        if (!isAuthorized)
+        {
+            NavManager.NavigateTo("/");
+        }
+
+        StateHasChanged();
+    }
+}
+
+@if (!isLoaded)
+{
+    <p><em>Loading...</em></p>
+}
+else if (isAuthorized)
+{
+    @ChildContent
+}

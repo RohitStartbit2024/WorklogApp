@@ -1,32 +1,13 @@
-﻿@using WorklogApp.Services
-
-@inherits LayoutComponentBase
+﻿@inherits LayoutComponentBase
+@using WorklogApp.Services
 @inject CurrentUserService CurrentUserService
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
-
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
-</div>
-
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
-</div>
+@inject NavigationManager Navigation
 
 @code {
     private bool _userLoaded = false;
+
+    // Check if current page is the login page
+    private bool IsLoginPage => Navigation.Uri.EndsWith("/");
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -34,7 +15,45 @@
         {
             await CurrentUserService.LoadUserAsync();
             _userLoaded = true;
-            StateHasChanged(); // re-render after loading user
+            StateHasChanged();
         }
     }
+
+    private string DisplayName =>
+        CurrentUserService.CurrentUser != null
+            ? $"{CurrentUserService.CurrentUser.FirstName} {CurrentUserService.CurrentUser.LastName}"
+            : "Name";
 }
+
+@if (!IsLoginPage)
+{
+    <div class="page">
+        <div class="sidebar">
+            <NavMenu />
+        </div>
+
+        <main>
+            <div class="top-row px-4">
+                @DisplayName
+            </div>
+
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+    </div>
+}
+else
+{
+    <div class="page">
+        <article class="content px-4">
+            @Body
+        </article>
+    </div>
+}
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>

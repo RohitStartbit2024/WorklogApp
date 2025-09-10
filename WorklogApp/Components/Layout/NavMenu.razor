@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using WorklogApp.Services
+@inject CurrentUserService CurrentUserService
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">WorklogApp</a>
     </div>
@@ -8,29 +11,62 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="admin/users" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Users
-            </NavLink>
-        </div>
+        @if (_userLoaded && CurrentUserService.CurrentUser != null)
+        {
+            @switch (CurrentUserService.CurrentUser.RoleName)
+            {
+                case "Admin":
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/admin/users" Match="NavLinkMatch.All">
+                            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Users
+                        </NavLink>
+                    </div>
+                    break;
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="manager/projects">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Projects
-            </NavLink>
-        </div>
+                case "Employee":
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/employee/worklogs" Match="NavLinkMatch.All">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Add Worklog
+                        </NavLink>
+                    </div>
+                    break;
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="employee/worklogs">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Worklog
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="manager/worklogs">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Check Worklog
-            </NavLink>
-        </div>
+                case "Manager":
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/manager/projects" Match="NavLinkMatch.All">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Projects
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/manager/worklogs" Match="NavLinkMatch.All">
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Worklogs
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="/manager/reports" Match="NavLinkMatch.All">
+                            <span class="bi bi-file-earmark-bar-graph-fill-nav-menu" aria-hidden="true"></span> Worklog Reports
+                        </NavLink>
+                    </div>
+                    break;
+            }
+        }
+        else if (!_userLoaded)
+        {
+            <p class="text-muted ps-3">Loading menu...</p>
+        }
     </nav>
 </div>
 
+@code {
+    private bool _userLoaded = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_userLoaded)
+        {
+            await CurrentUserService.LoadUserAsync();
+            _userLoaded = true;
+            StateHasChanged(); // re-render menu after user is loaded
+        }
+    }
+}

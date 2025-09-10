@@ -2,212 +2,213 @@
 @using Microsoft.Extensions.Caching.Memory
 @using WorklogApp.Models
 @using WorklogApp.Services
-@using OfficeOpenXml;
+@using OfficeOpenXml
 @inject WorklogService WorklogService
 @inject ProjectService ProjectService
 @inject CurrentUserService CurrentUserService
 @inject UserService UserService
 @inject IHttpContextAccessor HttpContextAccessor
+@inject IMemoryCache Cache
+@inject NavigationManager Navigation
 
-<h3>Manager Worklog Reports</h3>
+<ProtectedPage TPage="object" AllowedRoles="@managerRoles">
 
-@if (!CurrentUserLoaded)
-{
-    <p><em>Loading...</em></p>
-}
-else if (CurrentUserService.CurrentUser == null)
-{
-    <p class="text-danger">Not authorized</p>
-}
-else
-{
-    <div class="mb-3">
-        <label class="form-label fw-bold">View By:</label>
-        <select class="form-control" @bind="filterMode">
-            <option value="Project">Project</option>
-            <option value="Employee">Employee</option>
-        </select>
-    </div>
-    @if (filteredWorklogs.Count > 0)
+    <h3>Manager Worklog Reports</h3>
+
+    @if (!CurrentUserLoaded)
     {
-        <button class="btn btn-success" @onclick="PrepareExport">
-            Export to Excel
-        </button>
+        <p><em>Loading...</em></p>
+    }
+    else if (CurrentUserService.CurrentUser == null)
+    {
+        <p class="text-danger">Not authorized</p>
+    }
+    else
+    {
+        <div class="mb-3">
+            <label class="form-label fw-bold">View By:</label>
+            <select class="form-control" @bind="filterMode">
+                <option value="Project">Project</option>
+                <option value="Employee">Employee</option>
+            </select>
+        </div>
+
+        @if (filteredWorklogs.Count > 0)
+        {
+            <button class="btn btn-success" @onclick="PrepareExport">
+                Export to Excel
+            </button>
+        }
+
+        @if (filterMode == "Project")
+        {
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Select Project:</label>
+                    <select class="form-control" @bind="selectedProjectId">
+                        <option value="">-- All Projects --</option>
+                        @foreach (var p in projects)
+                        {
+                            <option value="@p.Id">@p.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Start Date:</label>
+                    <input type="date" class="form-control" @bind="startDate" />
+                </div>
+                <div class="col-md-3">
+                    <label>End Date:</label>
+                    <input type="date" class="form-control" @bind="endDate" />
+                </div>
+                <div class="col-md-2">
+                    <label>Page Size:</label>
+                    <input type="number" class="form-control" @bind="pageSize" min="1" />
+                </div>
+            </div>
+
+            <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Search by ID or Name"
+                           @bind="searchTerm" @bind:event="oninput" />
+                </div>
+                <div class="col-md-3">
+                    <label>Status:</label>
+                    <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
+                        <option value="">-- All --</option>
+                        @foreach (var status in Enum.GetValues<WorklogStatus>())
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Employee Id</th>
+                        <th @onclick='() => SortBy("Name")'>Employee Name</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
+                        <th @onclick='() => SortBy("TotalHours")'>Total</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredWorklogs != null)
+                    {
+                        int index = 1;
+                        foreach (var w in filteredWorklogs.Take(pageSize))
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@w.User?.EmployeeId</td>
+                                <td>@w.User?.FirstName @w.User?.LastName</td>
+                                <td>@w.Date.ToShortDateString()</td>
+                                <td>@w.OnlineHours</td>
+                                <td>@w.OfflineHours</td>
+                                <td>@w.OtherHours</td>
+                                <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
+                                <td>@w.Status</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+            </table>
+        }
+        else if (filterMode == "Employee")
+        {
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label>Select Employee:</label>
+                    <select class="form-control" @bind="selectedEmployeeId">
+                        <option value="">-- All Employees --</option>
+                        @foreach (var e in employees)
+                        {
+                            <option value="@e.Id">@e.FirstName @e.LastName</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Start Date:</label>
+                    <input type="date" class="form-control" @bind="startDate" />
+                </div>
+                <div class="col-md-3">
+                    <label>End Date:</label>
+                    <input type="date" class="form-control" @bind="endDate" />
+                </div>
+                <div class="col-md-2">
+                    <label>Page Size:</label>
+                    <input type="number" class="form-control" @bind="pageSize" min="1" />
+                </div>
+            </div>
+
+            <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <input type="text" class="form-control" placeholder="Search by ID or Name"
+                           @bind="searchTerm" @bind:event="oninput" />
+                </div>
+                <div class="col-md-3">
+                    <label>Status:</label>
+                    <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
+                        <option value="">-- All --</option>
+                        @foreach (var status in Enum.GetValues<WorklogStatus>())
+                        {
+                            <option value="@status">@status</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>S.No</th>
+                        <th>Project Id</th>
+                        <th @onclick='() => SortBy("Name")'>Project Name</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
+                        <th @onclick='() => SortBy("TotalHours")'>Total</th>
+                        <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredWorklogs != null)
+                    {
+                        int index = 1;
+                        foreach (var w in filteredWorklogs.Take(pageSize))
+                        {
+                            <tr>
+                                <td>@index</td>
+                                <td>@w.Project?.ProjectId</td>
+                                <td>@w.Project?.Name</td>
+                                <td>@w.Date.ToShortDateString()</td>
+                                <td>@w.OnlineHours</td>
+                                <td>@w.OfflineHours</td>
+                                <td>@w.OtherHours</td>
+                                <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
+                                <td>@w.Status</td>
+                            </tr>
+                            index++;
+                        }
+                    }
+                </tbody>
+            </table>
+        }
     }
 
-    @if (filterMode == "Project")
-    {
-        <!-- Project-based filter -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label>Select Project:</label>
-                <select class="form-control" @bind="selectedProjectId">
-                    <option value="">-- All Projects --</option>
-                    @foreach (var p in projects)
-                    {
-                        <option value="@p.Id">@p.Name</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label>Start Date:</label>
-                <input type="date" class="form-control" @bind="startDate" />
-            </div>
-            <div class="col-md-3">
-                <label>End Date:</label>
-                <input type="date" class="form-control" @bind="endDate" />
-            </div>
-            <div class="col-md-2">
-                <label>Page Size:</label>
-                <input type="number" class="form-control" @bind="pageSize" min="1" />
-            </div>
-        </div>
-
-        <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
-
-        <!-- Filters -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Search by ID or Name"
-                       @bind="searchTerm" @bind:event="oninput" />
-
-            </div>
-            <div class="col-md-3">
-                <label>Status:</label>
-                <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
-                    <option value="">-- All --</option>
-                    @foreach (var status in Enum.GetValues<WorklogStatus>())
-                    {
-                        <option value="@status">@status</option>
-                    }
-                </select>
-            </div>
-        </div>
-
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Employee Id</th>
-                    <th @onclick='() => SortBy("Name")'>Employee Name</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
-                    <th @onclick='() => SortBy("TotalHours")'>Total</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (filteredWorklogs != null)
-                {
-                    int index = 1;
-                    foreach (var w in filteredWorklogs.Take(pageSize))
-                    {
-                        <tr>
-                            <td>@index</td>
-                            <td>@w.User?.EmployeeId</td>
-                            <td>@w.User?.FirstName @w.User?.LastName</td>
-                            <td>@w.Date.ToShortDateString()</td>
-                            <td>@w.OnlineHours</td>
-                            <td>@w.OfflineHours</td>
-                            <td>@w.OtherHours</td>
-                            <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
-                            <td>@w.Status</td>
-                        </tr>
-                        index++;
-                    }
-                }
-            </tbody>
-        </table>
-    }
-    else if (filterMode == "Employee")
-    {
-        <!-- Employee-based filter -->
-        <div class="row mb-3">
-            <div class="col-md-4">
-                <label>Select Employee:</label>
-                <select class="form-control" @bind="selectedEmployeeId">
-                    <option value="">-- All Employees --</option>
-                    @foreach (var e in employees)
-                    {
-                        <option value="@e.Id">@e.FirstName @e.LastName</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label>Start Date:</label>
-                <input type="date" class="form-control" @bind="startDate" />
-            </div>
-            <div class="col-md-3">
-                <label>End Date:</label>
-                <input type="date" class="form-control" @bind="endDate" />
-            </div>
-            <div class="col-md-2">
-                <label>Page Size:</label>
-                <input type="number" class="form-control" @bind="pageSize" min="1" />
-            </div>
-        </div>
-
-        <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
-
-        <!-- Filters -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <input type="text" class="form-control" placeholder="Search by ID or Name"
-                       @bind="searchTerm" @bind:event="oninput" />
-
-            </div>
-            <div class="col-md-3">
-                <label>Status:</label>
-                <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
-                    <option value="">-- All --</option>
-                    @foreach (var status in Enum.GetValues<WorklogStatus>())
-                    {
-                        <option value="@status">@status</option>
-                    }
-                </select>
-            </div>
-        </div>
-
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Project Id</th>
-                    <th @onclick='() => SortBy("Name")'>Project Name</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
-                    <th @onclick='() => SortBy("TotalHours")'>Total</th>
-                    <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (filteredWorklogs != null)
-                {
-                    int index = 1;
-                    foreach (var w in filteredWorklogs.Take(pageSize))
-                    {
-                        <tr>
-                            <td>@index</td>
-                            <td>@w.Project?.ProjectId</td>
-                            <td>@w.Project?.Name</td>
-                            <td>@w.Date.ToShortDateString()</td>
-                            <td>@w.OnlineHours</td>
-                            <td>@w.OfflineHours</td>
-                            <td>@w.OtherHours</td>
-                            <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
-                            <td>@w.Status</td>
-                        </tr>
-                        index++;
-                    }
-                }
-            </tbody>
-        </table>
-    }
-}
+</ProtectedPage>
 
 @code {
     private bool CurrentUserLoaded = false;
@@ -228,7 +229,7 @@ else
         set
         {
             _searchTerm = value;
-            ApplyFiltersAndSorting(); // runs on every keystroke
+            ApplyFiltersAndSorting();
         }
     }
     private string _searchTerm = string.Empty;
@@ -243,9 +244,10 @@ else
     }
     private string? _selectedStatus;
 
-
     private string sortColumn = "Date";
     private bool sortAscending = true;
+
+    private string[] managerRoles = new[] { "Manager" };
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -260,7 +262,7 @@ else
                 employees = await UserService.GetEmployeesAsync();
             }
 
-            StateHasChanged(); // refresh UI after data is loaded
+            StateHasChanged();
         }
     }
 
@@ -269,16 +271,11 @@ else
         worklogs.Clear();
 
         if (filterMode == "Project" && selectedProjectId.HasValue)
-        {
             worklogs = await WorklogService.GetWorklogsByProjectAsync(selectedProjectId.Value);
-        }
         else if (filterMode == "Employee" && selectedEmployeeId.HasValue)
-        {
             worklogs = await WorklogService.GetWorklogsByEmployeeAsync(selectedEmployeeId.Value);
-        }
         else
         {
-            // Fallback: load all from manager’s projects
             foreach (var p in projects)
             {
                 var logs = await WorklogService.GetWorklogsByProjectAsync(p.Id);
@@ -286,16 +283,11 @@ else
             }
         }
 
-        // filter by date
         if (startDate.HasValue)
-            worklogs = worklogs
-                        .Where(w => w.Date.ToDateTime(TimeOnly.MinValue) >= startDate.Value)
-                        .ToList();
+            worklogs = worklogs.Where(w => w.Date.ToDateTime(TimeOnly.MinValue) >= startDate.Value).ToList();
 
         if (endDate.HasValue)
-            worklogs = worklogs
-                        .Where(w => w.Date.ToDateTime(TimeOnly.MinValue) <= endDate.Value)
-                        .ToList();
+            worklogs = worklogs.Where(w => w.Date.ToDateTime(TimeOnly.MinValue) <= endDate.Value).ToList();
 
         ApplyFiltersAndSorting();
     }
@@ -310,7 +302,6 @@ else
 
         var query = worklogs.AsQueryable();
 
-        // 🔎 Search filter
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var lower = searchTerm.ToLower();
@@ -324,16 +315,9 @@ else
             );
         }
 
-        // 🎯 Status filter
-        if (!string.IsNullOrEmpty(selectedStatus))
-        {
-            if (Enum.TryParse<WorklogStatus>(selectedStatus, out var parsedStatus))
-            {
-                query = query.Where(w => w.Status == parsedStatus);
-            }
-        }
+        if (!string.IsNullOrEmpty(selectedStatus) && Enum.TryParse<WorklogStatus>(selectedStatus, out var parsedStatus))
+            query = query.Where(w => w.Status == parsedStatus);
 
-        // Sorting
         query = sortColumn switch
         {
             "Name" => sortAscending
@@ -384,16 +368,10 @@ else
         ApplyFiltersAndSorting();
     }
 
-    [Inject] IMemoryCache Cache { get; set; } = default!;
-    [Inject] NavigationManager Navigation { get; set; } = default!;
-
     private void PrepareExport()
     {
-        // Unique cache key per user/session
         var key = $"export_worklogs_{CurrentUserService.CurrentUser!.Id}";
-        Cache.Set(key, filteredWorklogs, TimeSpan.FromMinutes(5)); // keep for 5 mins
-
-        // Redirect browser to endpoint (download starts)
+        Cache.Set(key, filteredWorklogs, TimeSpan.FromMinutes(5));
         Navigation.NavigateTo($"/export/worklogs?key={key}", forceLoad: true);
     }
 }

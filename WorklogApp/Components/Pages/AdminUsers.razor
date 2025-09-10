@@ -1,61 +1,84 @@
 ﻿@page "/admin/users"
-
 @using WorklogApp.Services
-@using WorklogApp.Models;
+@using WorklogApp.Models
 
 @inject UserService UserService
 @inject NavigationManager Navigation
+@inject CurrentUserService CurrentUserService
 
+<ProtectedPage TPage="object" AllowedRoles="@adminRoles">
+    <h3>Manage Users</h3>
 
-<h3>Manage Users</h3>
-
-@if (users == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add User</button>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>EmployeeId</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in users)
-            {
+    @if (!isLoaded)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (!users.Any())
+    {
+        <p>No users found.</p>
+        <button class="btn btn-primary" @onclick="ShowAddForm">Add User</button>
+    }
+    else
+    {
+        <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add User</button>
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>@user.EmployeeId</td>
-                    <td>@user.FirstName @user.LastName</td>
-                    <td>@user.Email</td>
-                    <td>@user.UserRole?.Role</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user.Id)">Edit</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteUser(user.Id)">Delete</button>
-                    </td>
+                    <th>EmployeeId</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td>@user.EmployeeId</td>
+                        <td>@user.FirstName @user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.UserRole?.Role</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user.Id)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteUser(user.Id)">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</ProtectedPage>
 
 @code {
-    private List<User>? users;
+    private List<User> users = new();
+    private string[] adminRoles = new[] { "Admin" };
+    private bool isLoaded = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        users = await UserService.GetUsersAsync();
-    }
+        if (firstRender)
+        {
+            // Load current user (JS interop safe here)
+            if (CurrentUserService.CurrentUser == null)
+            {
+                await CurrentUserService.LoadUserAsync();
+            }
 
-    private async Task DeleteUser(int id)
-    {
-        await UserService.DeleteUserAsync(id);
-        users = await UserService.GetUsersAsync();
+            var currentUser = CurrentUserService.CurrentUser;
+            if (currentUser == null || currentUser.RoleName != "Admin")
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
+
+            // Load users after user validation
+            users = await UserService.GetUsersAsync() ?? new List<User>();
+            isLoaded = true;
+
+            // Trigger UI update
+            StateHasChanged();
+        }
     }
 
     private void ShowAddForm()
@@ -68,4 +91,10 @@ else
         Navigation.NavigateTo($"/admin/users/form/{id}");
     }
 
+    private async Task DeleteUser(int id)
+    {
+        await UserService.DeleteUserAsync(id);
+        users = await UserService.GetUsersAsync() ?? new List<User>();
+        StateHasChanged();
+    }
 }

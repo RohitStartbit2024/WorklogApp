@@ -5,105 +5,109 @@
 @inject CurrentUserService CurrentUserService
 @inject NavigationManager Navigation
 
-<h3>My Worklogs</h3>
+<ProtectedPage TPage="object" AllowedRoles="@employeeRoles">
 
-@if (CurrentUserService.CurrentUser == null)
-{
-    <p><em>Redirecting to login...</em></p>
-}
-else
-{
-    <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add Worklog</button>
+    <h3>My Worklogs</h3>
 
-    @if (worklogs == null || projects == null)
+    @if (CurrentUserService.CurrentUser == null)
     {
-        <p><em>Loading...</em></p>
+        <p><em>Redirecting to login...</em></p>
     }
     else
     {
-        @if (showForm)
+        <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add Worklog</button>
+
+        @if (worklogs == null || projects == null)
         {
-            <EditForm Model="worklogModel" OnValidSubmit="SaveWorklog">
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-
-                <div class="mb-3">
-                    <label class="form-label">Project</label>
-                    <select class="form-control" @bind="worklogModel.ProjectId">
-                        <option value="">-- Select Project --</option>
-                        @foreach (var p in projects)
-                        {
-                            <option value="@p.Id">@p.Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Date</label>
-                    <InputDate class="form-control" @bind-Value="worklogModel.Date" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Online Hours</label>
-                    <InputNumber class="form-control" @bind-Value="worklogModel.OnlineHours" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Offline Hours</label>
-                    <InputNumber class="form-control" @bind-Value="worklogModel.OfflineHours" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Other Hours</label>
-                    <InputNumber class="form-control" @bind-Value="worklogModel.OtherHours" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Work Description</label>
-                    <InputTextArea class="form-control" @bind-Value="worklogModel.Description" />
-                </div>
-
-                <button type="submit" class="btn btn-success">Save</button>
-                <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
-            </EditForm>
+            <p><em>Loading...</em></p>
         }
+        else
+        {
+            @if (showForm)
+            {
+                <EditForm Model="worklogModel" OnValidSubmit="SaveWorklog">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-        <table class="table table-striped mt-3">
-            <thead>
-                <tr>
-                    <th>Project</th>
-                    <th>Date</th>
-                    <th>Online</th>
-                    <th>Offline</th>
-                    <th>Other</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var w in worklogs)
-                {
-                    <tr>
-                        <td>@w.Project?.Name</td>
-                        <td>@w.Date</td>
-                        <td>@w.OnlineHours</td>
-                        <td>@w.OfflineHours</td>
-                        <td>@w.OtherHours</td>
-                        <td>@w.Description</td>
-                        <td>@w.Status</td>
-                        <td>
-                            @if (w.Status == WorklogStatus.Pending)
+                    <div class="mb-3">
+                        <label class="form-label">Project</label>
+                        <select class="form-control" @bind="worklogModel.ProjectId">
+                            <option value="">-- Select Project --</option>
+                            @foreach (var p in projects)
                             {
-                                <button class="btn btn-sm btn-warning" @onclick="() => EditWorklog(w.Id)">Edit</button>
+                                <option value="@p.Id">@p.Name</option>
                             }
-                        </td>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <InputDate class="form-control" @bind-Value="worklogModel.Date" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Online Hours</label>
+                        <InputNumber class="form-control" @bind-Value="worklogModel.OnlineHours" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Offline Hours</label>
+                        <InputNumber class="form-control" @bind-Value="worklogModel.OfflineHours" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Other Hours</label>
+                        <InputNumber class="form-control" @bind-Value="worklogModel.OtherHours" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Work Description</label>
+                        <InputTextArea class="form-control" @bind-Value="worklogModel.Description" />
+                    </div>
+
+                    <button type="submit" class="btn btn-success">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+                </EditForm>
+            }
+
+            <table class="table table-striped mt-3">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Date</th>
+                        <th>Online</th>
+                        <th>Offline</th>
+                        <th>Other</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var w in worklogs)
+                    {
+                        <tr>
+                            <td>@w.Project?.Name</td>
+                            <td>@w.Date</td>
+                            <td>@w.OnlineHours</td>
+                            <td>@w.OfflineHours</td>
+                            <td>@w.OtherHours</td>
+                            <td>@w.Description</td>
+                            <td>@w.Status</td>
+                            <td>
+                                @if (w.Status == WorklogStatus.Pending)
+                                {
+                                    <button class="btn btn-sm btn-warning" @onclick="() => EditWorklog(w.Id)">Edit</button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
-}
+
+</ProtectedPage>
 
 @code {
     private List<Worklog>? worklogs;
@@ -111,9 +115,10 @@ else
     private Worklog worklogModel = new();
     private bool showForm = false;
 
+    private string[] employeeRoles = new[] { "Employee" };
+
     protected override async Task OnInitializedAsync()
     {
-        // Check if user is logged in
         if (CurrentUserService.CurrentUser == null)
         {
             Navigation.NavigateTo("/");

@@ -4,52 +4,57 @@
 @inject ProjectService ProjectService
 @inject NavigationManager Navigation
 
-<h3>Project Management</h3>
+<ProtectedPage TPage="object" AllowedRoles="@managerRoles">
 
-<button type="button" class="btn btn-primary mb-3" @onclick="ShowAddProject">Add Project</button>
+    <h3>Project Management</h3>
 
-@if (projects == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Project Id</th>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Assigned Users</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var project in projects)
-            {
+    <button type="button" class="btn btn-primary mb-3" @onclick="ShowAddProject">Add Project</button>
+
+    @if (projects == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>@project.ProjectId</td>
-                    <td>@project.Name</td>
-                    <td>@project.Description</td>
-                    <td>
-                        @if (project.UserProjects != null)
-                        {
-                            @string.Join(", ", project.UserProjects.Select(up => up.User?.FirstName + " " + up.User?.LastName))
-                        }
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" @onclick="() => EditProject(project.Id)">Edit</button>
-                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteProject(project.Id)">Delete</button>
-                        <button class="btn btn-sm btn-info" @onclick="() => AssignUsers(project.Id)">Assign Users</button>
-                    </td>
+                    <th>Project Id</th>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Assigned Users</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var project in projects)
+                {
+                    <tr>
+                        <td>@project.ProjectId</td>
+                        <td>@project.Name</td>
+                        <td>@project.Description</td>
+                        <td>
+                            @if (project.UserProjects != null)
+                            {
+                                @string.Join(", ", project.UserProjects.Select(up => up.User?.FirstName + " " + up.User?.LastName))
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" @onclick="() => EditProject(project.Id)">Edit</button>
+                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteProject(project.Id)">Delete</button>
+                            <button class="btn btn-sm btn-info" @onclick="() => AssignUsers(project.Id)">Assign Users</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</ProtectedPage>
 
 @code {
     private List<Project>? projects;
+    private string[] managerRoles = new[] { "Manager" };
 
     protected override async Task OnInitializedAsync()
     {
