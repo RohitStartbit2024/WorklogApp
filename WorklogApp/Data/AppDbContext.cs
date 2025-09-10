@@ -23,6 +23,12 @@ namespace WorklogApp.Data
                 new UserRole { Id = 2, Role = "Manager" },
                 new UserRole { Id = 3, Role = "Employee" }
             );
+
+            modelBuilder.Entity<Project>()
+                .HasOne(p => p.Manager)
+                .WithMany()
+                .HasForeignKey(p => p.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

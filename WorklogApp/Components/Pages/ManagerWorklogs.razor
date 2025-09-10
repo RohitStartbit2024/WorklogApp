@@ -94,7 +94,7 @@ else
             if (CurrentUserService.CurrentUser != null)
             {
                 var managerId = CurrentUserService.CurrentUser.Id;
-                projects = await ProjectService.GetProjectsByManagerAsync(managerId);
+                projects = await ProjectService.GetMyProjectsAsync();
                 await LoadWorklogs();
                 StateHasChanged();
             }

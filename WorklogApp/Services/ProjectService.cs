@@ -7,21 +7,25 @@ namespace WorklogApp.Services
     public class ProjectService
     {
         private readonly AppDbContext _context;
+        private readonly CurrentUserService _currentUser;
 
-        public ProjectService(AppDbContext context)
+        public ProjectService(AppDbContext context, CurrentUserService currentUser)
         {
             _context = context;
+            _currentUser = currentUser;
         }
+
         public async Task<List<User>> GetAllUsersAsync()
         {
             return await _context.Users
-                .Include(u => u.UserRole) // <- important
+                .Include(u => u.UserRole)
                 .ToListAsync();
         }
 
         public async Task<List<Project>> GetProjectsAsync()
         {
             return await _context.Projects
+                .Include(p => p.Manager)
                 .Include(p => p.UserProjects)
                     .ThenInclude(up => up.User)
                 .ToListAsync();
@@ -30,15 +34,20 @@ namespace WorklogApp.Services
         public async Task<Project?> GetProjectAsync(int id)
         {
             return await _context.Projects
+                .Include(p => p.Manager)
                 .Include(p => p.UserProjects)
                     .ThenInclude(up => up.User)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task AddProjectAsync(Project project)
+        public async Task<Project> AddProjectAsync(Project project)
         {
+            if (_currentUser.CurrentUser != null)
+                project.ManagerId = _currentUser.CurrentUser.Id;
+
             _context.Projects.Add(project);
             await _context.SaveChangesAsync();
+            return project;
         }
 
         public async Task UpdateProjectAsync(Project project)
@@ -57,13 +66,19 @@ namespace WorklogApp.Services
             }
         }
 
-        public async Task<List<Project>> GetProjectsByManagerAsync(int managerId)
+        // 🔹 This is the correct way: filter by ManagerId, not UserProjects
+        public async Task<List<Project>> GetMyProjectsAsync()
         {
-            // Assuming a UserProjects table links users to projects
-            return await _context.UserProjects
-                .Where(up => up.UserId == managerId)
-                .Select(up => up.Project!)
-                .Distinct()
+            if (_currentUser.CurrentUser == null)
+                return new List<Project>();
+
+            var managerId = _currentUser.CurrentUser.Id;
+
+            return await _context.Projects
+                .Include(p => p.Manager)
+                .Include(p => p.UserProjects)
+                    .ThenInclude(up => up.User)
+                .Where(p => p.ManagerId == managerId)
                 .ToListAsync();
         }
 
