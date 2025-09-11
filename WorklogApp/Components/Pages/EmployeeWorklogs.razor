@@ -117,18 +117,24 @@
 
     private string[] employeeRoles = new[] { "Employee" };
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (CurrentUserService.CurrentUser == null)
+        if (firstRender)
         {
-            Navigation.NavigateTo("/");
-            return;
+            if (CurrentUserService.CurrentUser == null)
+            {
+                await CurrentUserService.LoadUserAsync();
+            }
+            if (CurrentUserService.CurrentUser == null)
+            {
+                Navigation.NavigateTo("/");
+                return;
+            }
+            var currentUserId = CurrentUserService.CurrentUser.Id;
+            projects = await WorklogService.GetUserProjectsAsync(currentUserId);
+            worklogs = await WorklogService.GetWorklogsByUserAsync(currentUserId);
+            StateHasChanged();
         }
-
-        var currentUserId = CurrentUserService.CurrentUser.Id;
-
-        projects = await WorklogService.GetUserProjectsAsync(currentUserId);
-        worklogs = await WorklogService.GetWorklogsByUserAsync(currentUserId);
     }
 
     private void ShowAddForm()

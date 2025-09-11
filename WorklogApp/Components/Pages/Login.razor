@@ -58,7 +58,25 @@
         if (result == PasswordVerificationResult.Success)
         {
             await CurrentUserService.SetUserAsync(user);
-            navManager.NavigateTo("/");
+            var roleName = user.UserRole?.Role ?? "";
+            switch (roleName)
+            {
+                case "Manager":
+                    navManager.NavigateTo("/manager/projects");
+                    break;
+
+                case "Employee":
+                    navManager.NavigateTo("/employee/worklogs");
+                    break;
+
+                case "Admin":
+                    navManager.NavigateTo("/admin/users");
+                    break;
+
+                default:
+                    navManager.NavigateTo("/");
+                    break;
+            }
         }
         else
         {
