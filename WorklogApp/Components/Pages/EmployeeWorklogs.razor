@@ -7,107 +7,170 @@
 
 <ProtectedPage TPage="object" AllowedRoles="@employeeRoles">
 
-    <h3>My Worklogs</h3>
+    <div class="container py-4">
 
-    @if (CurrentUserService.CurrentUser == null)
-    {
-        <p><em>Redirecting to login...</em></p>
-    }
-    else
-    {
-        <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add Worklog</button>
+        <!-- Title -->
+        <h3 class="text-center fw-bold mb-4"
+            style="background: linear-gradient(90deg,#a06cd5,#6247aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: all .3s;">
+            My Worklogs
+        </h3>
 
-        @if (worklogs == null || projects == null)
+        @if (CurrentUserService.CurrentUser == null)
         {
-            <p><em>Loading...</em></p>
+            <p class="text-center fst-italic text-secondary">Redirecting to login...</p>
         }
         else
         {
-            @if (showForm)
+            <!-- Add Button -->
+            <button class="btn text-white fw-semibold rounded-pill px-4 mb-3 shadow-sm"
+                    style="background: linear-gradient(135deg,#a06cd5,#6247aa); transition: all .3s;"
+                    onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.2)'"
+                    @onclick="ShowAddForm">
+                + Add Worklog
+            </button>
+
+            @if (worklogs == null || projects == null)
             {
-                <EditForm Model="worklogModel" OnValidSubmit="SaveWorklog">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary />
-
-                    <div class="mb-3">
-                        <label class="form-label">Project</label>
-                        <select class="form-control" @bind="worklogModel.ProjectId">
-                            <option value="">-- Select Project --</option>
-                            @foreach (var p in projects)
-                            {
-                                <option value="@p.Id">@p.Name</option>
-                            }
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Date</label>
-                        <InputDate class="form-control" @bind-Value="worklogModel.Date" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Online Hours</label>
-                        <InputNumber class="form-control" @bind-Value="worklogModel.OnlineHours" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Offline Hours</label>
-                        <InputNumber class="form-control" @bind-Value="worklogModel.OfflineHours" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Other Hours</label>
-                        <InputNumber class="form-control" @bind-Value="worklogModel.OtherHours" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Work Description</label>
-                        <InputTextArea class="form-control" @bind-Value="worklogModel.Description" />
-                    </div>
-
-                    <button type="submit" class="btn btn-success">Save</button>
-                    <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
-                </EditForm>
+                <p class="text-center fst-italic text-secondary">Loading...</p>
             }
+            else
+            {
+                <!-- Form Card -->
+                @if (showForm)
+                {
+                    <div class="p-4 rounded-4 shadow-lg mb-4 bg-white"
+                         style="transition: all .3s;">
+                        <EditForm Model="worklogModel" OnValidSubmit="SaveWorklog">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
 
-            <table class="table table-striped mt-3">
-                <thead>
-                    <tr>
-                        <th>Project</th>
-                        <th>Date</th>
-                        <th>Online</th>
-                        <th>Offline</th>
-                        <th>Other</th>
-                        <th>Description</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var w in worklogs)
-                    {
-                        <tr>
-                            <td>@w.Project?.Name</td>
-                            <td>@w.Date</td>
-                            <td>@w.OnlineHours</td>
-                            <td>@w.OfflineHours</td>
-                            <td>@w.OtherHours</td>
-                            <td>@w.Description</td>
-                            <td>@w.Status</td>
-                            <td>
-                                @if (w.Status == WorklogStatus.Pending)
-                                {
-                                    <button class="btn btn-sm btn-warning" @onclick="() => EditWorklog(w.Id)">Edit</button>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Project</label>
+                                <select class="form-select shadow-sm" @bind="worklogModel.ProjectId">
+                                    <option value="">-- Select Project --</option>
+                                    @foreach (var p in projects)
+                                    {
+                                        <option value="@p.Id">@p.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Date</label>
+                                <InputDate class="form-control shadow-sm" @bind-Value="worklogModel.Date" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Online Hours</label>
+                                <InputNumber class="form-control shadow-sm" @bind-Value="worklogModel.OnlineHours" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Offline Hours</label>
+                                <InputNumber class="form-control shadow-sm" @bind-Value="worklogModel.OfflineHours" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Other Hours</label>
+                                <InputNumber class="form-control shadow-sm" @bind-Value="worklogModel.OtherHours" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Work Description</label>
+                                <InputTextArea class="form-control shadow-sm" @bind-Value="worklogModel.Description" />
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit"
+                                        class="btn text-white fw-semibold rounded-pill px-4 shadow-sm"
+                                        style="background: linear-gradient(135deg,#a06cd5,#6247aa); transition: all .3s;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+                                        onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.2)'">
+                                    Save
+                                </button>
+                                <button type="button"
+                                        class="btn btn-secondary rounded-pill px-4 shadow-sm"
+                                        style="transition: all .3s;"
+                                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+                                        onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'"
+                                        @onclick="Cancel">
+                                    Cancel
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                }
+
+                <!-- Table Card -->
+                <div class="p-3 rounded-4 shadow-lg bg-white"
+                     style="transition: all .3s;">
+                    <table class="table align-middle text-center mb-0">
+                        <thead class="text-white"
+                               style="background: linear-gradient(90deg,#a06cd5,#6247aa);">
+                            <tr>
+                                <th>Project</th>
+                                <th>Date</th>
+                                <th>Online</th>
+                                <th>Offline</th>
+                                <th>Other</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var w in worklogs)
+                            {
+                                <tr style="transition: all .3s;"
+                                    onmouseover="this.style.backgroundColor='#f7f0fc'; this.style.transform='scale(1.01)'"
+                                    onmouseout="this.style.backgroundColor=''; this.style.transform='none'">
+                                    <td>@w.Project?.Name</td>
+                                    <td>@w.Date.ToString("dd MMM yyyy")</td>
+                                    <td>@w.OnlineHours</td>
+                                    <td>@w.OfflineHours</td>
+                                    <td>@w.OtherHours</td>
+                                    <td>@w.Description</td>
+                                    <td>
+                                        @if (w.Status == WorklogStatus.Pending)
+                                        {
+                                            <span class="badge rounded-pill px-3 py-2 text-dark fw-semibold"
+                                                  style="background:#ffeb99;">Pending</span>
+                                        }
+                                        else if (w.Status == WorklogStatus.Approved)
+                                        {
+                                            <span class="badge rounded-pill px-3 py-2 fw-semibold"
+                                                  style="background:#b7f7c2; color:#064420;">Approved</span>
+                                        }
+                                        else if (w.Status == WorklogStatus.Rejected)
+                                        {
+                                            <span class="badge rounded-pill px-3 py-2 fw-semibold"
+                                                  style="background:#f7b7b7; color:#5c0000;">Rejected</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (w.Status == WorklogStatus.Pending)
+                                        {
+                                            <button class="btn btn-sm text-white fw-semibold rounded-pill px-3 shadow-sm"
+                                                    style="background:#6247aa; transition: all .3s;"
+                                                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+                                                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'"
+                                                    @onclick="() => EditWorklog(w.Id)">
+                                                Edit
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         }
-    }
+    </div>
 
 </ProtectedPage>
+
 
 @code {
     private List<Worklog>? worklogs;

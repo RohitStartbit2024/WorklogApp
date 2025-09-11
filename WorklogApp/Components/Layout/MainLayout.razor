@@ -21,8 +21,8 @@
 
     private string DisplayName =>
         CurrentUserService.CurrentUser != null
-            ? $"{CurrentUserService.CurrentUser.FirstName} {CurrentUserService.CurrentUser.LastName}"
-            : "Name";
+            ? $"Welcome, {CurrentUserService.CurrentUser.FirstName} {CurrentUserService.CurrentUser.LastName}"
+            : "Welcome, Guest";
 }
 @if (!IsLoginPage)
 {
@@ -32,7 +32,7 @@
         </div>
 
         <main>
-            <div class="top-row px-4">
+            <div class="top-row fw-bolder px-4" style="color:#6247aa">
                 @DisplayName
             </div>
 
