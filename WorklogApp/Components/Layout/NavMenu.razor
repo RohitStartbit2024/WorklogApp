@@ -1,5 +1,6 @@
 ﻿@using WorklogApp.Services
 @inject CurrentUserService CurrentUserService
+@inject NavigationManager Navigation
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -44,11 +45,16 @@
                     </div>
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="/manager/reports" Match="NavLinkMatch.All">
-                            <span class="bi bi-file-earmark-bar-graph-fill-nav-menu" aria-hidden="true"></span> Worklog Reports
+                            <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Worklog Reports
                         </NavLink>
                     </div>
                     break;
             }
+            <div class="nav-item">
+                <button class="nav-link" @onclick="LogoutAsync">
+                    <i class="bi bi-file-earmark-bar-graph-fill-nav-menu"></i> Logout
+                </button>
+            </div>
         }
         else if (!_userLoaded)
         {
@@ -66,7 +72,13 @@
         {
             await CurrentUserService.LoadUserAsync();
             _userLoaded = true;
-            StateHasChanged(); // re-render menu after user is loaded
+            StateHasChanged();
         }
+    }
+
+    private async Task LogoutAsync()
+    {
+        await CurrentUserService.LogoutAsync();
+        Navigation.NavigateTo("/", true);
     }
 }
