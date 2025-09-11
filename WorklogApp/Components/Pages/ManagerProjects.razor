@@ -6,9 +6,20 @@
 
 <ProtectedPage TPage="object" AllowedRoles="@managerRoles">
 
-    <h3>Project Management</h3>
+    <h3 style="color:#6247aa; padding:0.75rem 1rem; text-align:center">
+        Project Management
+    </h3>
 
-    <button type="button" class="btn btn-primary mb-3" @onclick="ShowAddProject">Add Project</button>
+    <button type="button" @onclick="ShowAddProject"
+            style="background:linear-gradient(90deg,#a06cd5,#6247aa);
+                   border:none; padding:0.6rem 1.25rem;
+                   border-radius:0.5rem; color:white; font-weight:600;
+                   box-shadow:0 3px 8px rgba(0,0,0,0.25);
+                   transition:all 0.3s ease; margin-bottom:1rem; cursor:pointer;"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+            onmouseout="this.style.transform='none';this.style.boxShadow='0 3px 8px rgba(0,0,0,0.25)'">
+        ➕ Add Project
+    </button>
 
     @if (projects == null)
     {
@@ -16,33 +27,61 @@
     }
     else
     {
-        <table class="table table-striped">
-            <thead>
+        <table style="width:100%; border-collapse:collapse; background:#f7f0fc;
+                          border-radius:0.75rem; overflow:hidden;
+                          box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <thead style="background:linear-gradient(90deg,#a06cd5,#6247aa); color:white;">
                 <tr>
-                    <th>Project Id</th>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Assigned Users</th>
-                    <th>Actions</th>
+                    <th style="padding:0.75rem; text-align:left;">Project Id</th>
+                    <th style="padding:0.75rem; text-align:left;">Name</th>
+                    <th style="padding:0.75rem; text-align:left;">Description</th>
+                    <th style="padding:0.75rem; text-align:left;">Assigned Users</th>
+                    <th style="padding:0.75rem; text-align:left;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var project in projects)
                 {
-                    <tr>
-                        <td>@project.ProjectId</td>
-                        <td>@project.Name</td>
-                        <td>@project.Description</td>
-                        <td>
+                    <tr style="transition:all 0.2s ease; cursor:pointer;"
+                        onmouseover="this.style.backgroundColor='#e2cfea'"
+                        onmouseout="this.style.backgroundColor='transparent'">
+                        <td style="padding:0.75rem;">@project.ProjectId</td>
+                        <td style="padding:0.75rem;">@project.Name</td>
+                        <td style="padding:0.75rem;">@project.Description</td>
+                        <td style="padding:0.75rem;">
                             @if (project.UserProjects != null)
                             {
                                 @string.Join(", ", project.UserProjects.Select(up => up.User?.FirstName + " " + up.User?.LastName))
                             }
                         </td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditProject(project.Id)">Edit</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteProject(project.Id)">Delete</button>
-                            <button class="btn btn-sm btn-info" @onclick="() => AssignUsers(project.Id)">Assign Users</button>
+                        <td style="padding:0.75rem; display:flex; gap:0.5rem;">
+                            <button @onclick="() => EditProject(project.Id)"
+                                    style="background:#e2cfea; border:none; padding:0.4rem 0.75rem;
+                                                   border-radius:0.4rem; font-size:0.9rem; font-weight:600;
+                                                   box-shadow:0 2px 6px rgba(0,0,0,0.2);
+                                                   transition:all 0.3s ease; cursor:pointer;"
+                                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 12px rgba(0,0,0,0.25)'"
+                                    onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.2)'">
+                                ✏️ Edit
+                            </button>
+                            <button @onclick="() => DeleteProject(project.Id)"
+                                    style="background:#6247aa; color:white; border:none; padding:0.4rem 0.75rem;
+                                                   border-radius:0.4rem; font-size:0.9rem; font-weight:600;
+                                                   box-shadow:0 2px 6px rgba(0,0,0,0.25);
+                                                   transition:all 0.3s ease; cursor:pointer;"
+                                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 12px rgba(0,0,0,0.3)'"
+                                    onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.25)'">
+                                🗑️ Delete
+                            </button>
+                            <button @onclick="() => AssignUsers(project.Id)"
+                                    style="background:#102b3f; color:white; border:none; padding:0.4rem 0.75rem;
+                                                   border-radius:0.4rem; font-size:0.9rem; font-weight:600;
+                                                   box-shadow:0 2px 6px rgba(0,0,0,0.25);
+                                                   transition:all 0.3s ease; cursor:pointer;"
+                                    onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 5px 12px rgba(0,0,0,0.3)'"
+                                    onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.25)'">
+                                👥 Assign
+                            </button>
                         </td>
                     </tr>
                 }
