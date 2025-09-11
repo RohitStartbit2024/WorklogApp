@@ -7,47 +7,94 @@
 @inject CurrentUserService CurrentUserService
 
 <ProtectedPage TPage="object" AllowedRoles="@adminRoles">
-    <h3>Manage Users</h3>
 
-    @if (!isLoaded)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else if (!users.Any())
-    {
-        <p>No users found.</p>
-        <button class="btn btn-primary" @onclick="ShowAddForm">Add User</button>
-    }
-    else
-    {
-        <button class="btn btn-primary mb-3" @onclick="ShowAddForm">Add User</button>
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>EmployeeId</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in users)
-                {
-                    <tr>
-                        <td>@user.EmployeeId</td>
-                        <td>@user.FirstName @user.LastName</td>
-                        <td>@user.Email</td>
-                        <td>@user.UserRole?.Role</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user.Id)">Edit</button>
-                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteUser(user.Id)">Delete</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <div class="container py-4">
+
+        <!-- Title -->
+        <h3 class="text-center fw-bold mb-4"
+            style="background: linear-gradient(90deg,#a06cd5,#6247aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: all .3s;">
+            Manage Users
+        </h3>
+
+        @if (!isLoaded)
+        {
+            <p class="text-center fst-italic text-secondary">Loading...</p>
+        }
+        else if (!users.Any())
+        {
+            <p class="text-center text-muted">No users found.</p>
+            <button class="btn text-white fw-semibold rounded-pill px-4 shadow-sm"
+                    style="background: linear-gradient(135deg,#a06cd5,#6247aa); transition: all .3s;"
+                    onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.2)'"
+                    @onclick="ShowAddForm">
+                + Add User
+            </button>
+        }
+        else
+        {
+            <!-- Add Button -->
+            <button class="btn text-white fw-semibold rounded-pill px-4 mb-3 shadow-sm"
+                    style="background: linear-gradient(135deg,#a06cd5,#6247aa); transition: all .3s;"
+                    onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+                    onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.2)'"
+                    @onclick="ShowAddForm">
+                + Add User
+            </button>
+
+            <!-- Users Table -->
+            <div class="p-3 rounded-4 shadow-lg bg-white"
+                 style="transition: all .3s;">
+                <table class="table align-middle text-center mb-0">
+                    <thead class="text-white"
+                           style="background: linear-gradient(90deg,#a06cd5,#6247aa);">
+                        <tr>
+                            <th>EmployeeId</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in users)
+                        {
+                            <tr style="transition: all .3s;"
+                                onmouseover="this.style.backgroundColor='#f7f0fc'; this.style.transform='scale(1.01)'"
+                                onmouseout="this.style.backgroundColor=''; this.style.transform='none'">
+                                <td>@user.EmployeeId</td>
+                                <td>@user.FirstName @user.LastName</td>
+                                <td>@user.Email</td>
+                                <td>
+                                    <span class="badge rounded-pill px-3 py-2 fw-semibold"
+                                          style="background:#e8dcfa; color:#3a1d68;">
+                                        @user.UserRole?.Role
+                                    </span>
+                                </td>
+                                <td class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-sm text-white fw-semibold rounded-pill px-3 shadow-sm"
+                                            style="background:#6247aa; transition: all .3s;"
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.2)'"
+                                            onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'"
+                                            @onclick="() => EditUser(user.Id)">
+                                        Edit
+                                    </button>
+                                    <button class="btn btn-sm text-white fw-semibold rounded-pill px-3 shadow-sm"
+                                            style="background:#a06cd5; transition: all .3s;"
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(230,57,70,0.6)'"
+                                            onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'"
+                                            @onclick="() => DeleteUser(user.Id)">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
 </ProtectedPage>
 
 @code {
@@ -59,7 +106,6 @@
     {
         if (firstRender)
         {
-            // Load current user (JS interop safe here)
             if (CurrentUserService.CurrentUser == null)
             {
                 await CurrentUserService.LoadUserAsync();
@@ -72,11 +118,8 @@
                 return;
             }
 
-            // Load users after user validation
             users = await UserService.GetUsersAsync() ?? new List<User>();
             isLoaded = true;
-
-            // Trigger UI update
             StateHasChanged();
         }
     }

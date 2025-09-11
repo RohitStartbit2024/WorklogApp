@@ -6,72 +6,122 @@
 
 <ProtectedPage TPage="object" AllowedRoles="@adminRoles">
 
-    <h3>@(Id == null ? "Add User" : "Edit User")</h3>
+    <div class="container py-4">
 
-    @if (user == null || roles == null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else
-    {
-        <EditForm Model="user" OnValidSubmit="SaveUser">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
+        <!-- Title -->
+        <h3 class="text-center fw-bold mb-4"
+            style="background: linear-gradient(90deg,#a06cd5,#6247aa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; transition: all .3s;">
+            @(Id == null ? "Add User" : "Edit User")
+        </h3>
 
-            <div class="mb-3">
-                <label class="form-label">Employee Id</label>
-                <InputText class="form-control" @bind-Value="user.EmployeeId" />
-            </div>
+        @if (user == null || roles == null)
+        {
+            <p class="text-center fst-italic text-secondary">Loading...</p>
+        }
+        else
+        {
+            <!-- Form Card -->
+            <div class="p-4 rounded-4 shadow-lg bg-white mx-auto"
+                 style="max-width: 650px; transition: all .3s;">
+                <EditForm Model="user" OnValidSubmit="SaveUser">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger mb-3" />
 
-            <div class="mb-3">
-                <label class="form-label">First Name</label>
-                <InputText class="form-control" @bind-Value="user.FirstName" />
-            </div>
+                    <!-- Employee Id -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Employee Id</label>
+                        <InputText class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.EmployeeId" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Last Name</label>
-                <InputText class="form-control" @bind-Value="user.LastName" />
-            </div>
+                    <!-- First Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">First Name</label>
+                        <InputText class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.FirstName" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Email</label>
-                <InputText class="form-control" @bind-Value="user.Email" />
-            </div>
+                    <!-- Last Name -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Last Name</label>
+                        <InputText class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.LastName" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Phone No</label>
-                <InputText class="form-control" @bind-Value="user.PhoneNo" />
-            </div>
+                    <!-- Role -->
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Role</label>
+                        <InputSelect class="form-select rounded-3 shadow-sm border-0"
+                                     style="background:#f7f0fc;" @bind-Value="user.UserRoleId">
+                            @foreach (var role in roles)
+                            {
+                                <option value="@role.Id">@role.Role</option>
+                            }
+                        </InputSelect>
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Date of Birth</label>
-                <InputDate class="form-control" @bind-Value="user.DOB" />
-            </div>
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Email</label>
+                        <InputText class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.Email" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Date of Joining</label>
-                <InputDate class="form-control" @bind-Value="user.DateOfJoining" />
-            </div>
+                    <!-- Phone -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Phone No</label>
+                        <InputText class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.PhoneNo" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Password</label>
-                <InputText class="form-control" @bind-Value="user.Password" type="password" />
-            </div>
+                    <!-- DOB -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date of Birth</label>
+                        <InputDate class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.DOB" />
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Role</label>
-                <InputSelect class="form-control" @bind-Value="user.UserRoleId">
-                    @foreach (var role in roles)
+                    <!-- DOJ -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Date of Joining</label>
+                        <InputDate class="form-control rounded-3 shadow-sm border-0"
+                                   style="background:#f7f0fc;" @bind-Value="user.DateOfJoining" />
+                    </div>
+
+                    <!-- Password -->
+                    @if (!Id.HasValue)
                     {
-                        <option value="@role.Id">@role.Role</option>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Password</label>
+                            <InputText type="password"
+                                       class="form-control rounded-3 shadow-sm border-0"
+                                       style="background:#f7f0fc;" @bind-Value="user.Password" />
+                        </div>
                     }
-                </InputSelect>
-            </div>
 
-            <button type="submit" class="btn btn-success">Save</button>
-            <button type="button" class="btn btn-secondary" @onclick="GoBack">Cancel</button>
-        </EditForm>
-    }
+                    <!-- Buttons -->
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="submit"
+                                class="btn text-white fw-semibold rounded-pill px-4 shadow-sm"
+                                style="background: linear-gradient(135deg,#a06cd5,#6247aa); transition: all .3s;"
+                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(98,71,170,0.5)'"
+                                onmouseout="this.style.transform='none'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.2)'">
+                            Save
+                        </button>
+
+                        <button type="button"
+                                class="btn text-dark fw-semibold rounded-pill px-4 shadow-sm"
+                                style="background:#e2cfea; transition: all .3s;"
+                                onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 6px 18px rgba(0,0,0,0.2)'"
+                                onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.1)'"
+                                @onclick="GoBack">
+                            Cancel
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        }
+    </div>
 
 </ProtectedPage>
 
