@@ -13,7 +13,7 @@
 
 <ProtectedPage TPage="object" AllowedRoles="@managerRoles">
 
-    <h3>Manager Worklog Reports</h3>
+    <h3 style="color:#6247aa; padding:.75rem 1.25rem;text-align:center;">Manager Worklog Reports</h3>
 
     @if (!CurrentUserLoaded)
     {
@@ -21,31 +21,40 @@
     }
     else if (CurrentUserService.CurrentUser == null)
     {
-        <p class="text-danger">Not authorized</p>
+        <p style="color:#c00;font-weight:600;">Not authorized</p>
     }
     else
     {
-        <div class="mb-3">
-            <label class="form-label fw-bold">View By:</label>
-            <select class="form-control" @bind="filterMode">
-                <option value="Project">Project</option>
-                <option value="Employee">Employee</option>
-            </select>
-        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;align-items:flex-end;">
+            <div style="flex:1;max-width:30%;min-width:200px;margin-bottom:1rem;">
+                <label style="font-weight:600;color:#102b3f;display:block;margin-bottom:.25rem;">View By:</label>
+                <select @bind="filterMode" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;
+                           border:1px solid #ccc;background:#f7f0fc;
+                           box-shadow:0 2px 5px rgba(0,0,0,.1);transition:all .3s ease;">
+                    <option value="Project">Project</option>
+                    <option value="Employee">Employee</option>
+                </select>
+            </div>
 
-        @if (filteredWorklogs.Count > 0)
-        {
-            <button class="btn btn-success" @onclick="PrepareExport">
-                Export to Excel
-            </button>
-        }
+            @if (filteredWorklogs.Count > 0)
+            {
+                <div style="flex:1;max-width:20%;min-width:200px;margin-bottom:1rem;display:flex;align-items:flex-end;">
+                    <button @onclick="PrepareExport"
+                            style="flex:1;background:#062726;color:white;padding:.5rem 1rem;border:none;
+                                   border-radius:.375rem;box-shadow:0 3px 8px rgba(0,0,0,.2);
+                                   cursor:pointer;transition:all .3s ease;">
+                        Export to Excel
+                    </button>
+                </div>
+            }
+        </div>
 
         @if (filterMode == "Project")
         {
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>Select Project:</label>
-                    <select class="form-control" @bind="selectedProjectId">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div style="flex:1;min-width:220px;">
+                    <label style="font-weight:600;color:#102b3f;">Select Project:</label>
+                    <select @bind="selectedProjectId" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#f7f0fc;box-shadow:0 2px 5px rgba(0,0,0,.1);">
                         <option value="">-- All Projects --</option>
                         @foreach (var p in projects)
                         {
@@ -53,30 +62,34 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label>Start Date:</label>
-                    <input type="date" class="form-control" @bind="startDate" />
+                <div style="flex:1;min-width:160px;">
+                    <label style="font-weight:600;color:#102b3f;">Start Date:</label>
+                    <input type="date" @bind="startDate" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
-                <div class="col-md-3">
-                    <label>End Date:</label>
-                    <input type="date" class="form-control" @bind="endDate" />
-                </div>
-                <div class="col-md-2">
-                    <label>Page Size:</label>
-                    <input type="number" class="form-control" @bind="pageSize" min="1" />
+                <div style="flex:1;min-width:160px;">
+                    <label style="font-weight:600;color:#102b3f;">End Date:</label>
+                    <input type="date" @bind="endDate" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
             </div>
 
-            <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
+            <button @onclick="LoadWorklogs" style="background:linear-gradient(90deg,#a06cd5,#6247aa);color:white;padding:.5rem 1rem;border:none;border-radius:.375rem;box-shadow:0 3px 8px rgba(0,0,0,.2);cursor:pointer;transition:all .3s ease;margin-bottom:1rem;">Search</button>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Search by ID or Name"
-                           @bind="searchTerm" @bind:event="oninput" />
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div style="flex:2;min-width:220px;">
+                    <label style="font-weight:600;color:#102b3f;">Search:</label>
+                    <input type="text" placeholder="Search by ID or Name"
+                           @bind="searchTerm" @bind:event="oninput"
+                           style="width:100%;padding:.5rem .75rem;border-radius:.375rem;
+                              border:1px solid #ccc;background:#fff;
+                              box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
-                <div class="col-md-3">
-                    <label>Status:</label>
-                    <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
+
+                <div style="flex:1;min-width:180px;">
+                    <label style="font-weight:600;color:#102b3f;">Status:</label>
+                    <select @bind="selectedStatus" @bind:event="onchange"
+                            style="width:100%;padding:.5rem .75rem;border-radius:.375rem;
+                               border:1px solid #ccc;background:#f7f0fc;
+                               box-shadow:0 2px 5px rgba(0,0,0,.1);">
                         <option value="">-- All --</option>
                         @foreach (var status in Enum.GetValues<WorklogStatus>())
                         {
@@ -86,38 +99,39 @@
                 </div>
             </div>
 
-            <table class="table table-bordered table-hover">
-                <thead>
+            <table style="width:100%;border-collapse:collapse;box-shadow:0 3px 8px rgba(0,0,0,.1);
+                      border-radius:.5rem;overflow:hidden;margin-bottom:2rem;">
+                <thead style="background:#6247aa;color:white;">
                     <tr>
-                        <th>S.No</th>
-                        <th>Employee Id</th>
-                        <th @onclick='() => SortBy("Name")'>Employee Name</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
-                        <th>Worklog Description</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
-                        <th @onclick='() => SortBy("TotalHours")'>Total</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
+                        <th style="padding:.75rem;text-align:left;cursor:pointer;">S.No</th>
+                        <th style="padding:.75rem;">Employee Id</th>
+                        <th style="padding:.75rem;cursor:pointer;">Employee Name</th>
+                        <th style="padding:.75rem;cursor:pointer;">Date</th>
+                        <th style="padding:.75rem;">Worklog Description</th>
+                        <th style="padding:.75rem;cursor:pointer;">Online</th>
+                        <th style="padding:.75rem;cursor:pointer;">Offline</th>
+                        <th style="padding:.75rem;cursor:pointer;">Other</th>
+                        <th style="padding:.75rem;cursor:pointer;">Total</th>
+                        <th style="padding:.75rem;cursor:pointer;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (filteredWorklogs != null)
                     {
                         int index = 1;
-                        foreach (var w in filteredWorklogs.Take(pageSize))
+                        foreach (var w in filteredWorklogs)
                         {
-                            <tr>
-                                <td>@index</td>
-                                <td>@w.User?.EmployeeId</td>
-                                <td>@w.User?.FirstName @w.User?.LastName</td>
-                                <td>@w.Date.ToShortDateString()</td>
-                                <td>@w.Description</td>
-                                <td>@w.OnlineHours</td>
-                                <td>@w.OfflineHours</td>
-                                <td>@w.OtherHours</td>
-                                <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
-                                <td>@w.Status</td>
+                            <tr style="background:@(index % 2 == 0 ? "#f7f0fc" : "white");transition:all .3s ease;" onmouseover="this.style.background='#e2cfea'" onmouseout="this.style.background='@(index % 2 == 0 ? "#f7f0fc" : "white")'">
+                                <td style="padding:.75rem;">@index</td>
+                                <td style="padding:.75rem;">@w.User?.EmployeeId</td>
+                                <td style="padding:.75rem;">@w.User?.FirstName @w.User?.LastName</td>
+                                <td style="padding:.75rem;">@w.Date.ToShortDateString()</td>
+                                <td style="padding:.75rem;">@w.Description</td>
+                                <td style="padding:.75rem;">@w.OnlineHours</td>
+                                <td style="padding:.75rem;">@w.OfflineHours</td>
+                                <td style="padding:.75rem;">@w.OtherHours</td>
+                                <td style="padding:.75rem;">@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
+                                <td style="padding:.75rem;">@w.Status</td>
                             </tr>
                             index++;
                         }
@@ -127,10 +141,10 @@
         }
         else if (filterMode == "Employee")
         {
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <label>Select Employee:</label>
-                    <select class="form-control" @bind="selectedEmployeeId">
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div style="flex:1;min-width:220px;">
+                    <label style="font-weight:600;color:#102b3f;">Select Employee:</label>
+                    <select @bind="selectedEmployeeId" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#f7f0fc;box-shadow:0 2px 5px rgba(0,0,0,.1);">
                         <option value="">-- All Employees --</option>
                         @foreach (var e in employees)
                         {
@@ -138,30 +152,34 @@
                         }
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <label>Start Date:</label>
-                    <input type="date" class="form-control" @bind="startDate" />
+                <div style="flex:1;min-width:160px;">
+                    <label style="font-weight:600;color:#102b3f;">Start Date:</label>
+                    <input type="date" @bind="startDate" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
-                <div class="col-md-3">
-                    <label>End Date:</label>
-                    <input type="date" class="form-control" @bind="endDate" />
-                </div>
-                <div class="col-md-2">
-                    <label>Page Size:</label>
-                    <input type="number" class="form-control" @bind="pageSize" min="1" />
+                <div style="flex:1;min-width:160px;">
+                    <label style="font-weight:600;color:#102b3f;">End Date:</label>
+                    <input type="date" @bind="endDate" style="width:100%;padding:.5rem .75rem;border-radius:.375rem;border:1px solid #ccc;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
             </div>
 
-            <button class="btn btn-primary mb-3" @onclick="LoadWorklogs">Search</button>
+            <button @onclick="LoadWorklogs" style="background:linear-gradient(90deg,#a06cd5,#6247aa);color:white;padding:.5rem 1rem;border:none;border-radius:.375rem;box-shadow:0 3px 8px rgba(0,0,0,.2);cursor:pointer;transition:all .3s ease;margin-bottom:1rem;">Search</button>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <input type="text" class="form-control" placeholder="Search by ID or Name"
-                           @bind="searchTerm" @bind:event="oninput" />
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div style="flex:2;min-width:220px;">
+                    <label style="font-weight:600;color:#102b3f;">Search:</label>
+                    <input type="text" placeholder="Search by ID or Name"
+                           @bind="searchTerm" @bind:event="oninput"
+                           style="width:100%;padding:.5rem .75rem;border-radius:.375rem;
+                                      border:1px solid #ccc;background:#fff;
+                                      box-shadow:0 2px 5px rgba(0,0,0,.1);" />
                 </div>
-                <div class="col-md-3">
-                    <label>Status:</label>
-                    <select class="form-control" @bind="selectedStatus" @bind:event="onchange">
+
+                <div style="flex:1;min-width:180px;">
+                    <label style="font-weight:600;color:#102b3f;">Status:</label>
+                    <select @bind="selectedStatus" @bind:event="onchange"
+                            style="width:100%;padding:.5rem .75rem;border-radius:.375rem;
+                                       border:1px solid #ccc;background:#f7f0fc;
+                                       box-shadow:0 2px 5px rgba(0,0,0,.1);">
                         <option value="">-- All --</option>
                         @foreach (var status in Enum.GetValues<WorklogStatus>())
                         {
@@ -171,38 +189,41 @@
                 </div>
             </div>
 
-            <table class="table table-bordered table-hover">
-                <thead>
+            <table style="width:100%;border-collapse:collapse;box-shadow:0 3px 8px rgba(0,0,0,.1);
+                      border-radius:.5rem;overflow:hidden;margin-bottom:2rem;">
+                <thead style="background:#6247aa;color:white;">
                     <tr>
-                        <th>S.No</th>
-                        <th>Project Id</th>
-                        <th @onclick='() => SortBy("Name")'>Project Name</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
-                        <th>Worklog Description</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
-                        <th @onclick='() => SortBy("TotalHours")'>Total</th>
-                        <th @onclick="() => SortBy(nameof(Worklog.Status))">Status</th>
+                        <th style="padding:.75rem;text-align:left;">S.No</th>
+                        <th style="padding:.75rem;">Project Id</th>
+                        <th style="padding:.75rem;cursor:pointer;">Project Name</th>
+                        <th style="padding:.75rem;cursor:pointer;">Date</th>
+                        <th style="padding:.75rem;">Worklog Description</th>
+                        <th style="padding:.75rem;cursor:pointer;">Online</th>
+                        <th style="padding:.75rem;cursor:pointer;">Offline</th>
+                        <th style="padding:.75rem;cursor:pointer;">Other</th>
+                        <th style="padding:.75rem;cursor:pointer;">Total</th>
+                        <th style="padding:.75rem;cursor:pointer;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (filteredWorklogs != null)
                     {
                         int index = 1;
-                        foreach (var w in filteredWorklogs.Take(pageSize))
+                        foreach (var w in filteredWorklogs)
                         {
-                            <tr>
-                                <td>@index</td>
-                                <td>@w.Project?.ProjectId</td>
-                                <td>@w.Project?.Name</td>
-                                <td>@w.Date.ToShortDateString()</td>
-                                <td>@w.Description</td>
-                                <td>@w.OnlineHours</td>
-                                <td>@w.OfflineHours</td>
-                                <td>@w.OtherHours</td>
-                                <td>@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
-                                <td>@w.Status</td>
+                            <tr style="background:@(index % 2 == 0 ? "#f7f0fc" : "white");transition:all .3s ease;"
+                                onmouseover="this.style.background='#e2cfea'"
+                                onmouseout="this.style.background='@(index % 2 == 0 ? "#f7f0fc" : "white")'">
+                                <td style="padding:.75rem;">@index</td>
+                                <td style="padding:.75rem;">@w.Project?.ProjectId</td>
+                                <td style="padding:.75rem;">@w.Project?.Name</td>
+                                <td style="padding:.75rem;">@w.Date.ToShortDateString()</td>
+                                <td style="padding:.75rem;">@w.Description</td>
+                                <td style="padding:.75rem;">@w.OnlineHours</td>
+                                <td style="padding:.75rem;">@w.OfflineHours</td>
+                                <td style="padding:.75rem;">@w.OtherHours</td>
+                                <td style="padding:.75rem;">@(w.OnlineHours + w.OfflineHours + w.OtherHours)</td>
+                                <td style="padding:.75rem;">@w.Status</td>
                             </tr>
                             index++;
                         }
@@ -211,8 +232,8 @@
             </table>
         }
     }
-
 </ProtectedPage>
+
 
 @code {
     private bool CurrentUserLoaded = false;
@@ -226,7 +247,6 @@
     private int? selectedEmployeeId;
     private DateTime? startDate;
     private DateTime? endDate;
-    private int pageSize = 10;
     private string searchTerm
     {
         get => _searchTerm;
