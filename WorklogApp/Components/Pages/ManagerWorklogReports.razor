@@ -93,6 +93,7 @@
                         <th>Employee Id</th>
                         <th @onclick='() => SortBy("Name")'>Employee Name</th>
                         <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
+                        <th>Worklog Description</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
@@ -111,6 +112,7 @@
                                 <td>@w.User?.EmployeeId</td>
                                 <td>@w.User?.FirstName @w.User?.LastName</td>
                                 <td>@w.Date.ToShortDateString()</td>
+                                <td>@w.Description</td>
                                 <td>@w.OnlineHours</td>
                                 <td>@w.OfflineHours</td>
                                 <td>@w.OtherHours</td>
@@ -176,6 +178,7 @@
                         <th>Project Id</th>
                         <th @onclick='() => SortBy("Name")'>Project Name</th>
                         <th @onclick="() => SortBy(nameof(Worklog.Date))">Date</th>
+                        <th>Worklog Description</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OnlineHours))">Online</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OfflineHours))">Offline</th>
                         <th @onclick="() => SortBy(nameof(Worklog.OtherHours))">Other</th>
@@ -194,6 +197,7 @@
                                 <td>@w.Project?.ProjectId</td>
                                 <td>@w.Project?.Name</td>
                                 <td>@w.Date.ToShortDateString()</td>
+                                <td>@w.Description</td>
                                 <td>@w.OnlineHours</td>
                                 <td>@w.OfflineHours</td>
                                 <td>@w.OtherHours</td>

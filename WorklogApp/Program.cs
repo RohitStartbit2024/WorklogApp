@@ -65,11 +65,12 @@ namespace WorklogApp
                 ws.Cells[1, 4].Value = "Project Id";
                 ws.Cells[1, 5].Value = "Project";
                 ws.Cells[1, 6].Value = "Date";
-                ws.Cells[1, 7].Value = "Online";
-                ws.Cells[1, 8].Value = "Offline";
-                ws.Cells[1, 9].Value = "Other";
-                ws.Cells[1, 10].Value = "Total";
-                ws.Cells[1, 11].Value = "Status";
+                ws.Cells[1, 7].Value = "Worklog Description";
+                ws.Cells[1, 8].Value = "Online";
+                ws.Cells[1, 9].Value = "Offline";
+                ws.Cells[1, 10].Value = "Other";
+                ws.Cells[1, 11].Value = "Total";
+                ws.Cells[1, 12].Value = "Status";
 
                 int row = 2;
                 int index = 1;
@@ -81,11 +82,12 @@ namespace WorklogApp
                     ws.Cells[row, 4].Value = w.Project?.ProjectId;
                     ws.Cells[row, 5].Value = w.Project?.Name;
                     ws.Cells[row, 6].Value = w.Date.ToShortDateString();
-                    ws.Cells[row, 7].Value = w.OnlineHours;
-                    ws.Cells[row, 8].Value = w.OfflineHours;
-                    ws.Cells[row, 9].Value = w.OtherHours;
-                    ws.Cells[row, 10].Value = w.OnlineHours + w.OfflineHours + w.OtherHours;
-                    ws.Cells[row, 11].Value = w.Status.ToString();
+                    ws.Cells[row, 7].Value = w.Description;
+                    ws.Cells[row, 8].Value = w.OnlineHours;
+                    ws.Cells[row, 9].Value = w.OfflineHours;
+                    ws.Cells[row, 10].Value = w.OtherHours;
+                    ws.Cells[row, 11].Value = w.OnlineHours + w.OfflineHours + w.OtherHours;
+                    ws.Cells[row, 12].Value = w.Status.ToString();
                     row++;
                 }
 
