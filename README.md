@@ -1,7 +1,7 @@
 # 📘 WorklogApp
 
 A **Blazor Server Application** built with **.NET 8** and **MS SQL Server** that helps organizations track worklogs, manage projects, and generate reports.  
-The app supports multiple roles — **Admin**, **Manager**, and **User**.
+The app supports multiple roles — **Admin**, **Manager**, and **Employee**.
 
 ---
 
@@ -17,7 +17,7 @@ The app supports multiple roles — **Admin**, **Manager**, and **User**.
   - Approve/Reject employees worklogs.
   - View and filter employee worklogs.  
   - Export reports to Excel.
-- 📝 **User Portal**
+- 📝 **Employee Portal**
   - Submit daily worklogs (online, offline, and other hours). 
   - Status tracking of submitted logs.  
 - 📊 **Reporting**
@@ -76,4 +76,4 @@ dotnet publish -c Release
 
 - **Admin:** Manage  users.  
 - **Manager:** Create projects, review employee logs, generate reports.  
-- **User (Team Leader / Developer / Designer / Tester):** Submit daily logs, track status.  
+- **Employee:** Submit daily logs, track status.  
