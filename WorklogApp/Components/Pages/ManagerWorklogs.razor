@@ -7,76 +7,113 @@
 @inject NavigationManager Navigation
 
 <ProtectedPage TPage="object" AllowedRoles="@managerRoles">
-<h3>Worklogs Approval</h3>
+    <h3 style="text-align:center; color:#6247aa; padding:0.75rem 1rem;">
+        Worklogs Approval
+    </h3>
 
-@if (!CurrentUserLoaded)
-{
-    <p><em>Loading...</em></p>
-}
-else if (CurrentUserService.CurrentUser == null)
-{
-    Navigation.NavigateTo("/");
-}
-else if (projects == null)
-{
-    <p><em>Loading projects...</em></p>
-}
-else
-{
-    <div class="mb-3">
-        <label>Select Project:</label>
-        <select class="form-control" @onchange="OnProjectChange">
-            <option value="">-- All Projects --</option>
-            @foreach (var p in projects)
-            {
-                <option value="@p.Id" selected="@(selectedProjectId == p.Id)">
-                    @p.Name
-                </option>
-            }
-        </select>
-    </div>
-
-    <table class="table table-striped mt-3">
-        <thead>
-            <tr>
-                <th>Employee</th>
-                <th>Date</th>
-                <th>Project</th>
-                <th>Online</th>
-                <th>Offline</th>
-                <th>Other</th>
-                <th>Description</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (worklogs != null)
-            {
-                @foreach (var w in worklogs)
+    @if (!CurrentUserLoaded)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else if (CurrentUserService.CurrentUser == null)
+    {
+        Navigation.NavigateTo("/");
+    }
+    else if (projects == null)
+    {
+        <p><em>Loading projects...</em></p>
+    }
+    else
+    {
+        <div style="margin-bottom:1rem;">
+            <label style="font-weight:600; color:#102b3f;">Select Project:</label>
+            <select @onchange="OnProjectChange"
+                    style="width:100%; padding:0.5rem 0.75rem;
+                               font-size:1rem; border-radius:0.375rem;
+                               border:1px solid #ccc; background:#f7f0fc;
+                               margin-top:0.25rem; transition:all 0.3s ease;"
+                    onfocus="this.style.boxShadow='0 0 0 3px #e2cfea'"
+                    onblur="this.style.boxShadow='none'">
+                <option value="">-- All Projects --</option>
+                @foreach (var p in projects)
                 {
-                    <tr>
-                        <td>@w.User?.FirstName @w.User?.LastName</td>
-                        <td>@w.Date</td>
-                        <td>@w.Project?.Name</td>
-                        <td>@w.OnlineHours</td>
-                        <td>@w.OfflineHours</td>
-                        <td>@w.OtherHours</td>
-                        <td>@w.Description</td>
-                        <td>@w.Status</td>
-                        <td>
-                            @if (w.Status == WorklogStatus.Pending)
-                            {
-                                <button class="btn btn-sm btn-success me-1" @onclick="() => Approve(w.Id)">Approve</button>
-                                <button class="btn btn-sm btn-danger" @onclick="() => Reject(w.Id)">Reject</button>
-                            }
-                        </td>
-                    </tr>
+                    <option value="@p.Id" selected="@(selectedProjectId == p.Id)">
+                        @p.Name
+                    </option>
                 }
-            }
-        </tbody>
-    </table>
-}
+            </select>
+        </div>
+
+        <div style="overflow-x:auto; background:white; border-radius:0.5rem;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.15);">
+            <table style="width:100%; border-collapse:collapse; font-size:0.95rem;">
+                <thead>
+                    <tr style="background:#e2cfea; text-align:left;">
+                        <th style="padding:0.75rem;">Employee</th>
+                        <th style="padding:0.75rem;">Date</th>
+                        <th style="padding:0.75rem;">Project</th>
+                        <th style="padding:0.75rem;">Online</th>
+                        <th style="padding:0.75rem;">Offline</th>
+                        <th style="padding:0.75rem;">Other</th>
+                        <th style="padding:0.75rem;">Description</th>
+                        <th style="padding:0.75rem;">Status</th>
+                        <th style="padding:0.75rem;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (worklogs != null)
+                    {
+                        @foreach (var w in worklogs)
+                        {
+                            <tr style="border-bottom:1px solid #f0e6f7;
+                                                   transition:background 0.2s ease;"
+                                onmouseover="this.style.background='#f7f0fc'"
+                                onmouseout="this.style.background='white'">
+                                <td style="padding:0.75rem;">@w.User?.FirstName @w.User?.LastName</td>
+                                <td style="padding:0.75rem;">@w.Date</td>
+                                <td style="padding:0.75rem;">@w.Project?.Name</td>
+                                <td style="padding:0.75rem;">@w.OnlineHours</td>
+                                <td style="padding:0.75rem;">@w.OfflineHours</td>
+                                <td style="padding:0.75rem;">@w.OtherHours</td>
+                                <td style="padding:0.75rem;">@w.Description</td>
+                                <td style="padding:0.75rem; font-weight:600; color:#6247aa;">
+                                    @w.Status
+                                </td>
+                                <td style="padding:0.75rem;">
+                                    @if (w.Status == WorklogStatus.Pending)
+                                    {
+                                        <button @onclick="() => Approve(w.Id)"
+                                                style="background:#062726; color:white;
+                                                                       border:none; padding:0.4rem 0.9rem;
+                                                                       border-radius:0.375rem; font-size:0.85rem;
+                                                                       margin-right:0.5rem; cursor:pointer;
+                                                                       box-shadow:0 2px 6px rgba(0,0,0,0.25);
+                                                                       transition:all 0.3s ease;"
+                                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 14px rgba(6,39,38,0.5)'"
+                                                onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.25)'">
+                                            Approve
+                                        </button>
+
+                                        <button @onclick="() => Reject(w.Id)"
+                                                style="background:#a06cd5; color:white;
+                                                                       border:none; padding:0.4rem 0.9rem;
+                                                                       border-radius:0.375rem; font-size:0.85rem;
+                                                                       cursor:pointer;
+                                                                       box-shadow:0 2px 6px rgba(0,0,0,0.25);
+                                                                       transition:all 0.3s ease;"
+                                                onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 14px rgba(160,108,213,0.6)'"
+                                                onmouseout="this.style.transform='none';this.style.boxShadow='0 2px 6px rgba(0,0,0,0.25)'">
+                                            Reject
+                                        </button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
 </ProtectedPage>
 
 @code {
@@ -96,7 +133,6 @@ else
 
             if (CurrentUserService.CurrentUser != null)
             {
-                var managerId = CurrentUserService.CurrentUser.Id;
                 projects = await ProjectService.GetMyProjectsAsync();
                 await LoadWorklogs();
                 StateHasChanged();
