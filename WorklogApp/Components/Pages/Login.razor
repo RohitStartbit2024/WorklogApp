@@ -1,34 +1,46 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Identity
-@using WorklogApp.Models;
+@using WorklogApp.Models
 @using Microsoft.EntityFrameworkCore
 
 @inject NavigationManager navManager
 @inject WorklogApp.Services.CurrentUserService CurrentUserService
 @inject WorklogApp.Data.AppDbContext AppDbContext
 
-<h3>Login</h3>
+<div >
 
-<EditForm Model="@loginModel" OnValidSubmit="LoginUser">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+        <h3 style="text-align:center; margin-bottom:1.5rem; font-weight:bold; background: linear-gradient(90deg, #6a11cb, #2575fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Worklog App
+        </h3>
 
-    <div class="mb-3">
-        <label>Email</label>
-        <InputText @bind-Value="loginModel.Email" class="form-control" />
+        <EditForm Model="@loginModel" OnValidSubmit="LoginUser">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:600;">Email</label>
+                <InputText @bind-Value="loginModel.Email" placeholder="Enter your email" style="width:100%; padding:0.5rem 0.75rem; font-size:1rem; border-radius:0.375rem; border:1px solid #ccc;" />
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label style="font-weight:600;">Password</label>
+                <InputText @bind-Value="loginModel.Password" type="password" placeholder="Enter your password" style="width:100%; padding:0.5rem 0.75rem; font-size:1rem; border-radius:0.375rem; border:1px solid #ccc;" />
+            </div>
+
+            <button type="submit" style="width:100%; padding:0.5rem 1rem; font-size:1rem; font-weight:600; border:none; border-radius:0.375rem; background: linear-gradient(90deg, #6a11cb, #2575fc); color:white; cursor:pointer;">
+                Login
+            </button>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div style="color:#dc3545; margin-top:1rem; text-align:center;">@errorMessage</div>
+            }
+        </EditForm>
+
+        <div style="text-align:center; margin-top:1.5rem;">
+            <small style="color:#6c757d;">© 2025 WorklogApp</small>
+        </div>
     </div>
-    <div class="mb-3">
-        <label>Password</label>
-        <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-primary">Login</button>
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <div class="text-danger mt-2">@errorMessage</div>
-    }
-</EditForm>
 
 @code {
     private LoginModel loginModel = new();
@@ -64,15 +76,12 @@
                 case "Manager":
                     navManager.NavigateTo("/manager/projects");
                     break;
-
                 case "Employee":
                     navManager.NavigateTo("/employee/worklogs");
                     break;
-
                 case "Admin":
                     navManager.NavigateTo("/admin/users");
                     break;
-
                 default:
                     navManager.NavigateTo("/");
                     break;

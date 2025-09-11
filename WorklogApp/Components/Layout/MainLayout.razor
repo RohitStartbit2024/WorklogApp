@@ -24,7 +24,6 @@
             ? $"{CurrentUserService.CurrentUser.FirstName} {CurrentUserService.CurrentUser.LastName}"
             : "Name";
 }
-
 @if (!IsLoginPage)
 {
     <div class="page">
@@ -45,10 +44,11 @@
 }
 else
 {
-    <div class="page">
-        <article class="content px-4">
+    <!-- Login page: fully inline, no side margins -->
+    <div style="margin:0; padding:0; width:100%; height:100vh; display:flex; justify-content:center; align-items:center; background: linear-gradient(135deg, #6a11cb, #2575fc);">
+        <div style="width:100%; max-width:400px; background-color: rgba(255,255,255,0.95); padding:2rem; border-radius:1rem; box-shadow: 0 8px 25px rgba(0,0,0,0.3);">
             @Body
-        </article>
+        </div>
     </div>
 }
 
